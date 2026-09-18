@@ -19,7 +19,8 @@ const RegisterPage = () => {
     e.preventDefault();
 
     if (password.length < 6) {
-      setError("Password must be at least 6 character long.")
+      setError("Password must be at least 6 characters long.");
+      return;
     }
 
     setError('');
@@ -30,8 +31,9 @@ const RegisterPage = () => {
       toast.success('Registered successfully! Please Login');
       navigate('/login');
     } catch (err) {
-      setError(err.message || 'Failed to register. Please try again.');
-      toast.error(err.message || 'Failed to register.');
+      const errorMsg = err.error || err.message || 'Failed to register. Please try again.';
+      setError(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }

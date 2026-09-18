@@ -15,14 +15,14 @@ export const register = async (req, res, next) => {
     try {
         const { username, email, password } = req.body;
 
-        //Chech if user exist
-        const userExists = await User.findOne({ $or: [{ email }] });
+        // Check if user exists (email or username)
+        const userExists = await User.findOne({ $or: [{ email }, { username }] });
 
         if (userExists) {
             return res.status(400).json({
                 success: false,
                 error:
-                    userExists.email === email
+                    userExists.email.toLowerCase() === email.toLowerCase()
                         ? "Email already registered"
                         : "Username already taken",
                 statusCode: 400
@@ -80,7 +80,7 @@ export const login = async (req, res, next) => {
         if (!user) {
             return res.status(401).json({
                 success: false,
-                error: 'Invalid credentails',
+                error: 'Invalid credentials',
                 statusCode: 401
             });
         }
@@ -91,7 +91,7 @@ export const login = async (req, res, next) => {
         if (!isMatch) {
             return res.status(401).json({
                 success: false,
-                error: 'Invalid credentails',
+                error: 'Invalid credentials',
                 statusCode: 401
             });
         }

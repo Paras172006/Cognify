@@ -1,6 +1,15 @@
 import axiosInstance from '../utils/axiosInstance';
 import { API_PATHS } from '../utils/apiPaths';
 
+const extractError = (error, defaultMessage) => {
+  const serverError = error.response?.data?.error || error.response?.data?.message;
+  const msg = serverError || error.message || defaultMessage;
+  const err = new Error(msg);
+  err.error = msg;
+  err.statusCode = error.response?.status;
+  return err;
+};
+
 const login = async (email, password) => {
   try {
     const response = await axiosInstance.post(API_PATHS.AUTH.LOGIN, {
@@ -9,7 +18,7 @@ const login = async (email, password) => {
     });
     return response.data;
   } catch (error) {
-    throw error.response?.data || { message: 'An unknown error occurred' };
+    throw extractError(error, 'Failed to login');
   }
 };
 
@@ -22,7 +31,7 @@ const register = async (username, email, password) => {
     });
     return response.data;
   } catch (error) {
-    throw error.response?.data || { message: 'An unknown error occurred' };
+    throw extractError(error, 'Failed to register');
   }
 };
 
