@@ -2,8 +2,26 @@ import axiosInstance from '../utils/axiosInstance';
 import { API_PATHS } from '../utils/apiPaths';
 
 const extractError = (error, defaultMessage) => {
-  const serverError = error.response?.data?.error || error.response?.data?.message;
-  const msg = serverError || error.message || defaultMessage;
+  const serverData = error.response?.data;
+  let msg = '';
+
+  if (typeof serverData === 'string') {
+    msg = serverData;
+  } else if (serverData && typeof serverData === 'object') {
+    if (typeof serverData.error === 'string') {
+      msg = serverData.error;
+    } else if (typeof serverData.message === 'string') {
+      msg = serverData.message;
+    } else if (serverData.error && typeof serverData.error.message === 'string') {
+      msg = serverData.error.message;
+    } else if (serverData.error) {
+      msg = typeof serverData.error === 'object' ? JSON.stringify(serverData.error) : String(serverData.error);
+    }
+  } else if (typeof error.message === 'string') {
+    msg = error.message;
+  }
+
+  msg = msg || defaultMessage;
   const err = new Error(msg);
   err.error = msg;
   err.statusCode = error.response?.status;

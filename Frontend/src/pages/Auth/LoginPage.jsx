@@ -26,7 +26,9 @@ const LoginPage = () => {
       toast.success('Logged in successfully!');
       navigate('/dashboard');
     } catch (err) {
-      const errorMsg = err.error || err.message || 'Failed to login. Please check your credentials.';
+      const errorMsg = typeof err.error === 'string'
+        ? err.error
+        : (typeof err.message === 'string' ? err.message : 'Failed to login. Please check your credentials.');
       setError(errorMsg);
       toast.error(errorMsg);
     } finally {

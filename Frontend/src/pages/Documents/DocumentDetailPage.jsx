@@ -46,8 +46,8 @@ const DocumentDetailPage = () => {
 
     const baseUrl = (typeof window !== 'undefined' && window.process?.env?.REACT_APP_API_URL)
       ? window.process.env.REACT_APP_API_URL
-      : import.meta.env.API_URL;
-    return `${baseUrl}${filePath.startsWith('/') ? '' : '/'}${filePath}`;
+      : (import.meta.env.VITE_API_URL || import.meta.env.API_URL || '');
+    return `${baseUrl.replace(/\/+$/, '')}${filePath.startsWith('/') ? '' : '/'}${filePath}`;
   };
 
   const renderContent = () => {

@@ -34,15 +34,22 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
 app.use(
     cors({
         origin: (origin, callback) => {
-            // Allow requests with no origin (like mobile apps or curl)
+            // Allow requests with no origin (like mobile apps, curl, or Postman)
             if (!origin) return callback(null, true);
-            if (allowedOrigins.indexOf(origin) !== -1) {
-                callback(null, true);
-            } else {
-                callback(new Error('Not allowed by CORS'));
+
+            // Allow if matches allowedOrigins or wildcard '*'
+            if (allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
+                return callback(null, true);
             }
+
+            // Automatically allow Vercel previews/production and localhost
+            if (origin.endsWith('.vercel.app') || origin.includes('localhost') || origin.includes('127.0.0.1')) {
+                return callback(null, true);
+            }
+
+            callback(new Error(`Not allowed by CORS: ${origin}`));
         },
-        methods: ["GET", "POST", "PUT", "DELETE"],
+        methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
         allowedHeaders: ["Content-Type", "Authorization"],
         credentials: true,
     })
@@ -50,6 +57,14 @@ app.use(
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Root health check endpoint
+app.get('/', (req, res) => {
+    res.status(200).json({
+        success: true,
+        message: 'Cognify API is running successfully'
+    });
+});
 
 
 // Static folter for uploads
