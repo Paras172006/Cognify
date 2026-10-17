@@ -46,7 +46,7 @@ const DocumentDetailPage = () => {
 
     const baseUrl = (typeof window !== 'undefined' && window.process?.env?.REACT_APP_API_URL)
       ? window.process.env.REACT_APP_API_URL
-      : 'http://localhost:8000';
+      : import.meta.env.VITE_API_URL;
     return `${baseUrl}${filePath.startsWith('/') ? '' : '/'}${filePath}`;
   };
 
