@@ -43,7 +43,7 @@ app.use(
             }
 
             // Automatically allow Vercel previews/production and localhost
-            if (origin.endsWith('.vercel.app') || origin.includes('localhost') || origin.includes('127.0.0.1')) {
+            if (origin.includes('.vercel.app') || origin.includes('localhost') || origin.includes('127.0.0.1')) {
                 return callback(null, true);
             }
 

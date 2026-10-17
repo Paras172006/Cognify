@@ -1,4 +1,10 @@
-export const BASE_URL = (import.meta.env.VITE_API_URL || import.meta.env.API_URL || "").replace(/\/+$/, "");
+const defaultProdUrl = "https://cognify-r6h9.onrender.com";
+
+export const BASE_URL = (
+  import.meta.env.VITE_API_URL ||
+  import.meta.env.API_URL ||
+  (import.meta.env.PROD ? defaultProdUrl : "")
+).replace(/\/+$/, "");
 
 export const API_PATHS = {
   AUTH: {
