@@ -18,6 +18,24 @@ const RegisterPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const cleanUsername = username.trim();
+    const cleanEmail = email.trim().toLowerCase();
+
+    if (!cleanUsername) {
+      setError("Please enter a username.");
+      return;
+    }
+
+    if (cleanUsername.length < 3) {
+      setError("Username must be at least 3 characters long.");
+      return;
+    }
+
+    if (!cleanEmail) {
+      setError("Please enter an email address.");
+      return;
+    }
+
     if (password.length < 6) {
       setError("Password must be at least 6 characters long.");
       return;
@@ -27,7 +45,7 @@ const RegisterPage = () => {
     setLoading(true);
 
     try {
-      await authService.register(username, email, password);
+      await authService.register(cleanUsername, cleanEmail, password);
       toast.success('Registered successfully! Please Login');
       navigate('/login');
     } catch (err) {
@@ -87,6 +105,9 @@ const RegisterPage = () => {
                   onChange={(e) => setUsername(e.target.value)}
                   onFocus={() => setFocusedField("username")}
                   onBlur={() => setFocusedField(null)}
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck="false"
                   className="w-full h-12 pl-12 pr-4 border-2 border-slate-200 rounded-xl bg-slate-50/50 text-slate-900 placeholder-slate-400 text-sm font-medium transition-all duration-200 focus:outline-none focus:border-emerald-500 focus:bg-white focus:shadow-lg focus:shadow-emerald-500/10"
                   placeholder="yourusername"
                 />
@@ -115,6 +136,10 @@ const RegisterPage = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   onFocus={() => setFocusedField("email")}
                   onBlur={() => setFocusedField(null)}
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck="false"
+                  inputMode="email"
                   className="w-full h-12 pl-12 pr-4 border-2 border-slate-200 rounded-xl bg-slate-50/50 text-slate-900 placeholder-slate-400 text-sm font-medium transition-all duration-200 focus:outline-none focus:border-emerald-500 focus:bg-white focus:shadow-lg focus:shadow-emerald-500/10"
                   placeholder="you@example.com"
                 />
@@ -151,10 +176,17 @@ const RegisterPage = () => {
 
             {/* Error Message */}
             {error && (
-              <div className="rounded-lg bg-red-50 border border-red-200 p-3">
+              <div className="rounded-lg bg-red-50 border border-red-200 p-3 space-y-1">
                 <p className="text-xs text-red-600 font-medium text-center">
                   {error}
                 </p>
+                {error.toLowerCase().includes('already registered') && (
+                  <p className="text-center">
+                    <Link to="/login" className="text-xs font-semibold text-emerald-600 hover:text-emerald-700 underline">
+                      Sign in to your existing account &rarr;
+                    </Link>
+                  </p>
+                )}
               </div>
             )}
 

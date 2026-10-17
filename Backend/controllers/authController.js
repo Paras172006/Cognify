@@ -13,26 +13,42 @@ const generateToken = (id) => {
 // @acess   Public
 export const register = async (req, res, next) => {
     try {
-        const { username, email, password } = req.body;
+        let { username, email, password } = req.body;
+
+        const cleanUsername = username ? String(username).trim() : '';
+        const cleanEmail = email ? String(email).trim().toLowerCase() : '';
+
+        if (!cleanUsername || !cleanEmail || !password) {
+            return res.status(400).json({
+                success: false,
+                error: 'Please provide username, email, and password',
+                statusCode: 400
+            });
+        }
 
         // Check if user exists (email or username)
-        const userExists = await User.findOne({ $or: [{ email }, { username }] });
+        const userExists = await User.findOne({
+            $or: [
+                { email: cleanEmail },
+                { username: cleanUsername }
+            ]
+        });
 
         if (userExists) {
             return res.status(400).json({
                 success: false,
                 error:
-                    userExists.email.toLowerCase() === email.toLowerCase()
-                        ? "Email already registered"
-                        : "Username already taken",
+                    userExists.email.toLowerCase() === cleanEmail
+                        ? "Email already registered. Please sign in instead."
+                        : "Username already taken. Please choose another username.",
                 statusCode: 400
             });
         }
 
         // Create user
         const user = await User.create({
-            username,
-            email,
+            username: cleanUsername,
+            email: cleanEmail,
             password,
         });
 
@@ -63,10 +79,11 @@ export const register = async (req, res, next) => {
 // @acess   Public
 export const login = async (req, res, next) => {
     try {
-        const { email, password } = req.body;
+        let { email, password } = req.body;
+        const cleanEmail = email ? String(email).trim().toLowerCase() : '';
 
-        // Validate inpute
-        if (!email || !password) {
+        // Validate input
+        if (!cleanEmail || !password) {
             return res.status(400).json({
                 success: false,
                 error: 'Please provide email and password',
@@ -74,8 +91,8 @@ export const login = async (req, res, next) => {
             });
         }
 
-        // Chech for user (include password for camparison)
-        const user = await User.findOne({ email }).select("+password")
+        // Check for user (include password for comparison)
+        const user = await User.findOne({ email: cleanEmail }).select("+password");
 
         if (!user) {
             return res.status(401).json({

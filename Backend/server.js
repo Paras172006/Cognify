@@ -42,8 +42,15 @@ app.use(
                 return callback(null, true);
             }
 
-            // Automatically allow Vercel previews/production and localhost
-            if (origin.includes('.vercel.app') || origin.includes('localhost') || origin.includes('127.0.0.1')) {
+            // Automatically allow Vercel previews/production, localhost, and local network IPs (e.g. mobile testing on LAN)
+            if (
+                origin.includes('.vercel.app') ||
+                origin.includes('localhost') ||
+                origin.includes('127.0.0.1') ||
+                origin.includes('192.168.') ||
+                origin.includes('10.') ||
+                /^https?:\/\/172\.(1[6-9]|2\d|3[0-1])\./.test(origin)
+            ) {
                 return callback(null, true);
             }
 

@@ -6,7 +6,13 @@ const extractError = (error, defaultMessage) => {
   let msg = '';
 
   if (typeof serverData === 'string') {
-    msg = serverData;
+    if (serverData.includes('<!DOCTYPE') || serverData.includes('<html') || serverData.includes('<head')) {
+      msg = error.response?.status === 405
+        ? 'Service temporarily updating. Please refresh the page.'
+        : defaultMessage;
+    } else {
+      msg = serverData;
+    }
   } else if (serverData && typeof serverData === 'object') {
     if (typeof serverData.error === 'string') {
       msg = serverData.error;
@@ -17,6 +23,8 @@ const extractError = (error, defaultMessage) => {
     } else if (serverData.error) {
       msg = typeof serverData.error === 'object' ? JSON.stringify(serverData.error) : String(serverData.error);
     }
+  } else if (error.code === 'ERR_NETWORK' || error.message === 'Network Error') {
+    msg = 'Cannot connect to server. Please check your connection or wait 30s while backend starts.';
   } else if (typeof error.message === 'string') {
     msg = error.message;
   }
