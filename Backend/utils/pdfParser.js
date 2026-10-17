@@ -1,14 +1,14 @@
 import fs from "fs/promises";
-import { PDFParse } from "pdf-parse";
+import { createRequire } from "module";
 
+// pdf-parse is a CommonJS module; we use createRequire to import it in ESM
+const require = createRequire(import.meta.url);
+const pdfParse = require("pdf-parse");
 
- 
 export const extractTextFromPDF = async (filePath) => {
   try {
     const dataBuffer = await fs.readFile(filePath);
-    // pdf-parse expects a Uint8Array, not a Buffer
-    const parser = new PDFParse(new Uint8Array(dataBuffer));
-    const data = await parser.getText();
+    const data = await pdfParse(dataBuffer);
 
     return {
       extractedText: data.text,
