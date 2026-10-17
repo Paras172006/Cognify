@@ -10,6 +10,7 @@ import ChatInterface from '../../components/Chat/ChatInterface';
 import AIActions from '../../components/ai/AIActions';
 import FlashcardManager from '../../components/flashcards/FlashcardManager';
 import QuizManager from '../../components/quizzes/QuizManager';
+import { BASE_URL } from '../../utils/apiPaths';
 
 const DocumentDetailPage = () => {
 
@@ -38,16 +39,29 @@ const DocumentDetailPage = () => {
   const getPdfUrl = () => {
     if (!document?.data?.filePath) return null;
 
-    const filePath = document.data.filePath;
+    let filePath = document.data.filePath;
 
-    if (filePath.startsWith('http://') || filePath.startsWith('https://')) {
+    // If filePath is a localhost or local URL, strip it to the relative /uploads/ path
+    if (filePath.includes('localhost') || filePath.includes('127.0.0.1')) {
+      const idx = filePath.indexOf('/uploads/');
+      if (idx !== -1) {
+        filePath = filePath.substring(idx);
+      }
+    }
+
+    // If it's already a valid remote HTTPS URL (not localhost), use it directly
+    if (filePath.startsWith('https://')) {
       return filePath;
     }
 
-    const baseUrl = (typeof window !== 'undefined' && window.process?.env?.REACT_APP_API_URL)
-      ? window.process.env.REACT_APP_API_URL
-      : (import.meta.env.VITE_API_URL || import.meta.env.API_URL || '');
-    return `${baseUrl.replace(/\/+$/, '')}${filePath.startsWith('/') ? '' : '/'}${filePath}`;
+    const base = (
+      BASE_URL ||
+      import.meta.env.VITE_API_URL ||
+      import.meta.env.API_URL ||
+      (import.meta.env.PROD ? 'https://cognify-r6h9.onrender.com' : '')
+    ).replace(/\/+$/, '');
+
+    return `${base}${filePath.startsWith('/') ? '' : '/'}${filePath}`;
   };
 
   const renderContent = () => {

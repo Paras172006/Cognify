@@ -32,7 +32,7 @@ export const uploadDocument = async (req, res, next) => {
         }
 
         // Construct the URL for the uploaded file
-        const baseUrl = process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 8000}`;
+        const baseUrl = process.env.BACKEND_URL || process.env.RENDER_EXTERNAL_URL || (process.env.NODE_ENV === 'production' ? 'https://cognify-r6h9.onrender.com' : `http://localhost:${process.env.PORT || 8000}`);
         const fileUrl = `${baseUrl}/uploads/documents/${req.file.filename}`;
 
         // Create document record
@@ -137,10 +137,19 @@ export const getDocuments = async (req, res, next) => {
                 $sort: { uploadDate: -1 }
             }
         ]);
+
+        const prodBase = process.env.BACKEND_URL || process.env.RENDER_EXTERNAL_URL || 'https://cognify-r6h9.onrender.com';
+        const normalizedDocs = documents.map(doc => {
+            if (doc.filePath && (process.env.NODE_ENV === 'production' || process.env.BACKEND_URL)) {
+                doc.filePath = doc.filePath.replace(/^https?:\/\/localhost:\d+/i, prodBase);
+            }
+            return doc;
+        });
+
         res.status(200).json({
             success: true,
-            count: documents.length,
-            data: documents
+            count: normalizedDocs.length,
+            data: normalizedDocs
         });
     } catch (error) {
         next(error);
@@ -178,6 +187,11 @@ export const getDocument = async (req, res, next) => {
         const documentData = document.toObject();
         documentData.flashcardCount = flashcardCount;
         documentData.quizCount = quizCount;
+
+        if (documentData.filePath && (process.env.NODE_ENV === 'production' || process.env.BACKEND_URL)) {
+            const prodBase = process.env.BACKEND_URL || process.env.RENDER_EXTERNAL_URL || 'https://cognify-r6h9.onrender.com';
+            documentData.filePath = documentData.filePath.replace(/^https?:\/\/localhost:\d+/i, prodBase);
+        }
 
         res.status(200).json({
             success: true,
